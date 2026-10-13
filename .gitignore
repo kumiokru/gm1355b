@@ -6,7 +6,7 @@ __pycache__/
 log/
 *.csv
 *.txt
-
+zip/
 results/
 *.png
 
