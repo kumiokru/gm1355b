@@ -15,5 +15,6 @@ Then use `start.sh`, that should handle virtual envs and the packages required i
 
 This is based on two python scripts.
 * `gm1355.py` reads Benetech gm1355b output from USB and quits after user provided break (eg. ctrl c).
-* `analyze.py` reads the output and generates reports to ./log/ folder.
+  * populates `log/` folder for the analyze script.
+* `analyze.py` reads the output and generates reports to ./results/ folder.
 
