@@ -34,14 +34,14 @@ Example:
 ```bash
 python analyze-with-exclude -f results/20261012_123526_dBC_data.csv -e 17:45-17:55 20:21-20:41
 ```
+* Analyzes file `results/20261012_123526_dBC_data.csv`
+* Excludes times `17:45-17:55` and `20:21-20:41`
 
-Analyzes file `results/20261012_123526_dBC_data.csv`
-Excludes times `17:45-17:55` and `20:21-20:41`
 Creates new files for the original data to the same results folder:
-`20261012_123526_dBC_data_cleaned.csv`
-`20261012_123526_dBC_report_cleaned.txt`
-`20261012_123526_dBC_chart_cleaned.png`
+* `20261012_123526_dBC_data_cleaned.csv`
+* `20261012_123526_dBC_report_cleaned.txt`
+* `20261012_123526_dBC_chart_cleaned.png`
 
-Todo:
+### TODO:
 * maybe store all results in one zip?
 * maybe go through the zip if there is a need for exclusion?
