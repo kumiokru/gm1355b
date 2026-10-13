@@ -7,6 +7,9 @@ log/
 *.csv
 *.txt
 
+results/
+*.png
+
 # Ignore OS-specific temporary files
 .DS_Store
 Thumbs.db
