@@ -16,7 +16,6 @@ PRODUCT_ID = 0x74E3
 
 raw_logger = None
 raw_log_file_name = "raw_log.txt"
-# FIXED: Increased raw log size to 10 MB to prevent rapid rotation during fast sampling
 raw_log_file_size = 10 * 1024 * 1024
 csv_logger = None
 csv_log_file_name = "data.csv"
@@ -24,8 +23,8 @@ stdio_logger = None
 logging_folder = "log/"
 device = None
 
-# Sampling interval set to 125 ms (8 times per second) to catch fast boxing impacts
-delay_between_samples = 0.125                     
+# Sampling interval set to 125 ms (8 times per second)
+target_interval = 0.125                     
 
 cmd_buffer_linux = [0xb3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
 
@@ -34,8 +33,6 @@ def init_logging():
     if not os.path.exists(logging_folder):
         os.makedirs(logging_folder)
 
-    # FIXED: Using a standard FileHandler instead of TimedRotatingFileHandler
-    # This prevents the file from splitting every hour and keeps the session intact
     csv_logger = logging.getLogger('csv_logger')
     csv_logger.setLevel(logging.INFO)
     path = os.path.join(logging_folder, csv_log_file_name)
@@ -44,7 +41,6 @@ def init_logging():
     handler.setFormatter(logging.Formatter("%(message)s"))
     csv_logger.addHandler(handler)
 
-    # Setup Raw logger - Cleared on startup, rotates at 10 MB, keeps 3 backups
     raw_logger = logging.getLogger('raw_logger')
     raw_logger.setLevel(logging.INFO)
     path = os.path.join(logging_folder, raw_log_file_name)
@@ -96,11 +92,9 @@ def get_dB(value1, value2):
 
 def process_sample(data):
     t = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:22]
-    
     db_val = get_dB(data[0], data[1])
     status_byte = data[2]
     
-    # Print real-time values to the terminal
     print(f"[{t}] {db_val:.1f} {get_units(status_byte)} ({get_speed(status_byte)})", flush=True)
     
     csv_logger.info(f"{t},{db_val:.1f},{get_units(status_byte)}")
@@ -148,8 +142,9 @@ def capture_data():
     
     try:
         while True:
+            start_time = time.time()  # Otetaan silmukan alkamisaika talteen
+            
             try:
-                # USB timeout optimized to 100 ms for fast reading loops
                 device.write(0x02, cmd_buffer_linux, 100)
                 data = device.read(0x81, 8, 100)
                 
@@ -162,8 +157,16 @@ def capture_data():
                 else:
                     raw_logger.error(f"USB error while reading data: {e}")
                     break
-                    
-            time.sleep(delay_between_samples)
+            
+            # KORJAUS: Lasketaan dynaaminen uniaika viiveiden kompensoimiseksi
+            elapsed_time = time.time() - start_time
+            sleep_time = target_interval - elapsed_time
+            
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            else:
+                # Jos USB-liikenne oli hitaampaa kuin 125ms, ei odoteta ollenkaan vaan jatketaan heti
+                pass
             
     except KeyboardInterrupt:
         print("\nMeasurement stopped by user.")
